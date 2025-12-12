@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text;
 using Application.Contracts.Repositories;
-using Application.Contracts.Services.Mailing;
 using Application.Dtos;
 using Domain.Entities;
 using Domain.Enum;
@@ -21,13 +20,12 @@ public class CreateOrder
         public List<ProductSelectionDto> Products { get; set; } = new();
     }
 
-    public record ProductSelectionDto(Guid TicketId, int Quantity);
+    public record ProductSelectionDto(Guid ProductId, int Quantity);
 
     public class Handler(
     IOrderRepository orderRepository,
     IProductRepository productRepository,
-    IUnitOfWork unitOfWork,
-    IMailService mailService
+    IUnitOfWork unitOfWork
 ) : IRequestHandler<CreateOrderCommand, CreateOrderCommandResponse>
     {
         private const decimal ServiceFeePercentage = 0.04m; // 4%
@@ -44,13 +42,13 @@ public class CreateOrder
             // ✅ 1. Add product to order
             foreach (var selection in request.Products)
             {
-                var product = await productRepository.GetAsync(t => t.Id == selection.TicketId);
+                var product = await productRepository.GetAsync(t => t.Id == selection.ProductId);
                 if (product == null)
                     throw new DomainException("Product not found", "ProductNotFound", (int)HttpStatusCode.NotFound);
 
-                if (product.AvailableQuantity < selection.Quantity)
-                    throw new DomainException("Product is OUT OF STOCK", "ProductOutOfStock", (int)HttpStatusCode.BadRequest);
-
+                var reserved = await productRepository.TryReserveProductAsync(selection.ProductId, selection.Quantity);
+                if (!reserved)
+                    throw new DomainException($"Product '{product.Name}' is out of stock.", "OutOfStock", 400);
 
                 await productRepository.UpdateAsync(product.DecreaseQuantity(selection.Quantity));
 
@@ -72,38 +70,6 @@ public class CreateOrder
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-
-            await mailService.SendMail(
-            order.CustomerEmail,
-            order.CustomerName,
-                "Order Confirmation! 🎉",
-                $@"
-                <html>
-                <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                    <p>Hi <b>{order.CustomerName}</b>,</p>
-
-                    <p>Thank you for your order. Here are your order details:</p>
-
-                    <ul>
-                        {itemsHtmlBuilder}
-                    </ul>
-
-                    <p><strong>Subtotal:</strong> ₦{order.TotalAmount:N2}</p>
-                    <p><strong>Service Fee (4%):</strong> ₦{serviceFee:N2}</p>
-                    <p><strong>Total Payable:</strong> ₦{totalPayable:N2}</p>
-                    <p><strong>Order Reference:</strong> {order.OrderReference}</p>
-
-                    
-
-                    <p>
-                        Best regards,<br/>
-                        Production Grade Team
-                    </p>
-                </body>
-                </html>"
-            );
-
-
             return new CreateOrderCommandResponse
             {
                 Id = order.Id,
@@ -117,7 +83,7 @@ public class CreateOrder
 
         private static string GenerateOrderReference()
         {
-            return $"ORD-{DateTime.UtcNow:yyyyMMddHHmmssfffffff}{DateTime.UtcNow.Ticks % 100:D2}";
+            return $"ORD-{DateTime.UtcNow.Ticks % 100:D2}";
         }
     }
 

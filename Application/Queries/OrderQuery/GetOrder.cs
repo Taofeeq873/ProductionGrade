@@ -29,7 +29,7 @@ namespace Application.Queries.OrderQuery
         );
 
         public record OrderItemResponse(
-            string ticketName,
+            string productName,
             decimal? UnitPrice,
             int Quantity
         );

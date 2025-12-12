@@ -1,11 +1,6 @@
 
 using Application.Contracts.Repositories;
-using Application.Contracts.Services.Mailing;
-using Application.Contracts.Services.Queue;
-using Domain.Configurations;
 using Infrastructure.Persistence.Repositories;
-using Infrastructure.Services.Mailing;
-using Infrastructure.Services.Queue;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,15 +18,7 @@ public static class ServiceCollectionExtensions
                 options.UseNpgsql(connectionString, action => action.MigrationsAssembly("Infrastructure")));
     }
 
-    public static IServiceCollection AddMailingServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<MailConfiguration>(configuration.GetSection(MailConfiguration.SectionName));
-
-        services.AddScoped<IMailService, MailService>();
-        services.AddSingleton<IMailProvider, MailProvider>();
-
-        return services;
-    }
+   
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration configuration)
@@ -40,15 +27,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-
-    public static IServiceCollection AddQueue(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<MessageBrokerConfiguration>(
-            configuration.GetSection(MessageBrokerConfiguration.SectionName));
-        services.AddScoped<IProducer, Producer>();
-        services.AddHostedService<EmailConsumerService>();
-        return services;
-    }
 
    
     public static IServiceCollection AddRepositories(this IServiceCollection services)

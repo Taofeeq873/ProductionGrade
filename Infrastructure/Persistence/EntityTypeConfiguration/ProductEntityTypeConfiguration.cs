@@ -46,9 +46,5 @@ public class ProductEntityTypeConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.ModifiedAt)
             .IsRequired(false);
-
-        builder.Property(p => p.RowVersion)
-            .IsRowVersion()
-            .IsRequired(false);
     }
 }

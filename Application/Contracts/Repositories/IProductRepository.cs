@@ -12,5 +12,8 @@ namespace Application.Contracts.Repositories
     public interface IProductRepository : ICrud<Product>
     {
         Task<List<ProductDto>> GetListAsync(Expression<Func<Product, bool>> predicate);
+
+        Task<bool> TryReserveProductAsync(Guid productId, int quantity);
+
     }
 }

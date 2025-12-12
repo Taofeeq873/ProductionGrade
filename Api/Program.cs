@@ -30,8 +30,6 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAl
 // Add Database
 builder.Services.AddDatabase(configuration);
 // add services 
-builder.Services.AddMailingServices(configuration);
-builder.Services.AddQueue(configuration);
 builder.Services.AddApplicationServices(configuration);
 
 // add repos
