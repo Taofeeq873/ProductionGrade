@@ -29,8 +29,7 @@ Configuration via environment variables and appsettings.json.
 - **Validation:** FluentValidation  
 - **Mapping:** Mapster  
 - **Logging:** Microsoft.Extensions.Logging, with optional Sentry integration  
-- **API Documentation:** Swagger (Swashbuckle) with JWT security support 
-- **Swagger / OpenAPI for API documentation
+- **API Documentation:** Swagger (Swashbuckle)
 
 ---
 
@@ -46,7 +45,7 @@ Configuration via environment variables and appsettings.json.
    ```json
    {
       "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5433;Database=ProductionGrade_db;Username=postgres;Password=opeyemi.873"
+    "DefaultConnection": ""
      },
      "DB_HOST": "localhost",
      "DB_PORT": 5432,
