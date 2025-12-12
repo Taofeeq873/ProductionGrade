@@ -21,51 +21,31 @@ Integration with mailing service and RabbitMQ message broker.
 
 Configuration via environment variables and appsettings.json.
 
-#Tech Stack
+# Jekapass API
 
-.NET 8 with C#
+## Tech Stack
 
-Entity Framework Core (PostgreSQL)
+- **Backend Framework:** ASP.NET Core Web API  
+- **ORM & Database:** Entity Framework Core with PostgreSQL  
+- **Mediation & CQRS:** MediatR  
+- **Messaging Queue:** RabbitMQ (for async email handling)  
+- **Email Provider:** SendinBlue (via transactional email API)  
+- **Validation:** FluentValidation  
+- **Mapping:** Mapster  
+- **Logging:** Microsoft.Extensions.Logging, with optional Sentry integration  
+- **API Documentation:** Swagger (Swashbuckle) with JWT security support  
 
-MediatR for CQRS pattern (Commands & Queries)
+---
 
-FluentValidation for input validation
+## Setup Instructions
 
-Mapster for object mapping
+1. **Prerequisites:**  
+   - .NET 8 SDK
+   - PostgreSQL (ensure running locally or remote)  
+   - RabbitMQ server (default config expects localhost:5672)  
+   - email provider
 
-RabbitMQ for message queuing
-
-An email service provider(Brevo) for mailing
-
-Sentry for error tracking
-
-Swagger / OpenAPI for API documentation
-
-PostgreSQL for relational database
-
-
-#Assumptions
-
-Database is PostgreSQL, running on configured port.
-
-Email notifications are processed asynchronously via RabbitMQ queues for scalability and reliability.
-
-Email service requires API key and endpoint configured.
-
-Product stock quantity and status are the source of truth for availability.
-
-#Setup Instructions
-#Prerequisites
-
-.NET 9 SDK
-
-PostgreSQL
-
-RabbitMQ
-
-An email service provider(Brevo) for mailing
-
-  **Configuration:**  
+2. **Configuration:**  
    Provide these values in `appsettings.json` or environment variables:
 
    ```json
@@ -84,6 +64,21 @@ An email service provider(Brevo) for mailing
      "MailConfiguration": {
        "FromName": "ProductionGrade",
        "FromEmail": "email",
-       "ApiKey": "your_emailprovider_api_key"
+       "ApiKey": "your_api_key"
      }
    }
+
+
+#Assumptions
+
+The product inventory manages availability through domain logic ensuring safe stock decrement.
+
+Email notifications are processed asynchronously via RabbitMQ queues for scalability and reliability.
+
+The RabbitMQ queue named emailQueue is durable and persistent.
+
+API input/output use JSON with camelCase naming conventions.
+
+JWT authentication is expected (Swagger is configured for Bearer token auth).
+
+The Brevo API key is valid and configured in the environment to enable transactional email sending.
