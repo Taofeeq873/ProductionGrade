@@ -1,0 +1,62 @@
+
+using Application.Contracts.Repositories;
+using Application.Contracts.Services.Mailing;
+using Application.Contracts.Services.Queue;
+using Domain.Configurations;
+using Infrastructure.Persistence.Repositories;
+using Infrastructure.Services.Mailing;
+using Infrastructure.Services.Queue;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Infrastructure.Extensions;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
+        IConfiguration configuration)
+    {
+        var connectionString = configuration.GetDbConnectionStringBuilder().ConnectionString;
+        return serviceCollection
+            .AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString, action => action.MigrationsAssembly("Infrastructure")));
+    }
+
+    public static IServiceCollection AddMailingServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<MailConfiguration>(configuration.GetSection(MailConfiguration.SectionName));
+
+        services.AddScoped<IMailService, MailService>();
+        services.AddSingleton<IMailProvider, MailProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+
+        return services;
+    }
+
+
+    public static IServiceCollection AddQueue(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<MessageBrokerConfiguration>(
+            configuration.GetSection(MessageBrokerConfiguration.SectionName));
+        services.AddScoped<IProducer, Producer>();
+        services.AddHostedService<EmailConsumerService>();
+        return services;
+    }
+
+   
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+
+        return services;
+    }
+}
