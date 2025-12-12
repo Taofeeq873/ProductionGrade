@@ -29,7 +29,7 @@ Configuration via environment variables and appsettings.json.
 - **ORM & Database:** Entity Framework Core with PostgreSQL  
 - **Mediation & CQRS:** MediatR  
 - **Messaging Queue:** RabbitMQ (for async email handling)  
-- **Email Provider:** SendinBlue (via transactional email API)  
+- **Email Provider:** Brevo (via transactional email API)  
 - **Validation:** FluentValidation  
 - **Mapping:** Mapster  
 - **Logging:** Microsoft.Extensions.Logging, with optional Sentry integration  
